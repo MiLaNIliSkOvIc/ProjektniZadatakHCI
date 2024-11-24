@@ -25,7 +25,6 @@ namespace ProjektniZadatakHCI
             _cards.Add(new CardModel { Id = i, ImagePath = $"C:\\Users\\pc\\Desktop\\picturesOfCars\\image{i+1}.png", IsMatched = false });
         }
 
-        // Mešamo kartice
         _cards = _cards.OrderBy(x => Guid.NewGuid()).ToList();
 
         return _cards;

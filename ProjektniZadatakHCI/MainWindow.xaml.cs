@@ -131,6 +131,7 @@ namespace ProjektniZadatakHCI
             StartGame(pairs);
         }
 
+        //ne potrebna
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             int totalCards = CardPanel.Children.Count;
