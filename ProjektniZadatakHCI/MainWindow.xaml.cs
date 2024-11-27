@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace ProjektniZadatakHCI
@@ -24,7 +24,7 @@ namespace ProjektniZadatakHCI
             _gameLogic.GameWon += EndGame;
             ElapsedTimeText.Text = "0 s";
             ScoreTextRight.Text = "0";
-            MovesText.Text= "0";
+            MovesText.Text = "0";
             _timer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
@@ -61,7 +61,7 @@ namespace ProjektniZadatakHCI
                     Margin = new Thickness(2),
                     Width = 50,
                     Height = 50,
-                    Padding = new Thickness(0)
+                    Padding = new Thickness(0),
                 };
 
                 var grid = new Grid();
@@ -73,13 +73,13 @@ namespace ProjektniZadatakHCI
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     Foreground = Brushes.FloralWhite
-                    
                 };
 
                 grid.Children.Add(placeholderText);
 
                 button.Content = grid;
 
+                
                 button.Click += (s, e) =>
                 {
                     var btn = s as Button;
@@ -87,12 +87,36 @@ namespace ProjektniZadatakHCI
 
                     if (!model.IsFlipped && !model.IsMatched)
                     {
-                        model.IsFlipped = true;
-                        _gameLogic.FlipCard(model);
-                        _moves++;
-                        UpdateScoreAndMoves();
+                        
+                        var rotateTransform = new RotateTransform
+                        {
+                            CenterX = btn.Width / 2,
+                            CenterY = btn.Height / 2,
+                            Angle = 0
+                        };
+
+                        btn.RenderTransform = rotateTransform;
+
+                        
+                        var flipAnimation = new DoubleAnimation
+                        {
+                            From = 0,
+                            To = 360,
+                            Duration = TimeSpan.FromMilliseconds(500),
+                            AutoReverse = false
+                        };
+
+                        flipAnimation.Completed += (sender, args) =>
+                        {
+                            model.IsFlipped = true;
+                            _gameLogic.FlipCard(model);
+                            _moves++;
+                            UpdateScoreAndMoves();
+                            UpdateUI();
+                        };
+
+                        rotateTransform.BeginAnimation(RotateTransform.AngleProperty, flipAnimation);
                     }
-                    UpdateUI();
                 };
 
                 CardPanel.Children.Add(button);
@@ -100,7 +124,6 @@ namespace ProjektniZadatakHCI
 
             RevealAllCardsThenHide();
             _timer.Start();
-            
         }
 
         private async void StartGameButton_Click(object sender, RoutedEventArgs e)
@@ -119,19 +142,18 @@ namespace ProjektniZadatakHCI
             };
             CountdownText.Visibility = Visibility.Visible;
 
-            CardPanel.Visibility=Visibility.Collapsed;
+            CardPanel.Visibility = Visibility.Collapsed;
             for (int i = 3; i > 0; i--)
             {
-                CountdownText.Text = "Game starts in " + i.ToString(); 
-                await Task.Delay(1000); 
+                CountdownText.Text = "Game starts in " + i.ToString();
+                await Task.Delay(1000);
             }
-            
+
             CountdownText.Visibility = Visibility.Collapsed;
             CardPanel.Visibility = Visibility.Visible;
             StartGame(pairs);
         }
 
-        //ne potrebna
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             int totalCards = CardPanel.Children.Count;
@@ -187,6 +209,17 @@ namespace ProjektniZadatakHCI
                         placeholderText.Text = card.IsFlipped ? card.Id.ToString() : "?";
                         button.IsEnabled = !card.IsMatched;
 
+                        if (card.IsFlipped)
+                        {
+                            button.BorderBrush = Brushes.DarkGoldenrod;
+                            button.BorderThickness = new Thickness(2.5);
+                        }
+                        else
+                        {
+                            button.BorderBrush = Brushes.DarkSlateBlue;
+                            button.BorderThickness = new Thickness(2);
+                        }
+
                         if (card.IsMatched && !card.ScoreCounted)
                         {
                             _score += 10;
@@ -206,15 +239,11 @@ namespace ProjektniZadatakHCI
 
         private void EndGame()
         {
-           
             CardPanel.Visibility = Visibility.Collapsed;
             CountdownText.Visibility = Visibility.Visible;
 
-            CountdownText.Text = $"Congratulations, you've scored { _score} points.";
+            CountdownText.Text = $"Congratulations, you've scored {_score} points.";
             _timer.Stop();
-
-
-            
         }
 
         private void RestartGame_Click(object sender, RoutedEventArgs e)
@@ -226,8 +255,6 @@ namespace ProjektniZadatakHCI
             CountdownText.Visibility = Visibility.Collapsed;
             StartGame(15);
             _timer.Start();
-
-            
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
