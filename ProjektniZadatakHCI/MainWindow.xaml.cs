@@ -102,7 +102,7 @@ namespace ProjektniZadatakHCI
                         {
                             From = 0,
                             To = 360,
-                            Duration = TimeSpan.FromMilliseconds(500),
+                            Duration = TimeSpan.FromMilliseconds(400),
                             AutoReverse = false
                         };
 
@@ -211,7 +211,7 @@ namespace ProjektniZadatakHCI
 
                         if (card.IsFlipped)
                         {
-                            button.BorderBrush = Brushes.DarkGoldenrod;
+                            button.BorderBrush = Brushes.DarkGray;
                             button.BorderThickness = new Thickness(2.5);
                         }
                         else
@@ -242,7 +242,7 @@ namespace ProjektniZadatakHCI
             CardPanel.Visibility = Visibility.Collapsed;
             CountdownText.Visibility = Visibility.Visible;
 
-            CountdownText.Text = $"Congratulations, you've scored {_score} points.";
+            CountdownText.Text = $"Congratulations, you've scored {_score+20} points.";
             _timer.Stop();
         }
 
